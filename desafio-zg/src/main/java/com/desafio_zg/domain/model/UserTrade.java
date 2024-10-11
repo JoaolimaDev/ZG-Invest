@@ -1,6 +1,5 @@
 package com.desafio_zg.domain.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import jakarta.persistence.Column;
@@ -30,8 +29,8 @@ public class UserTrade {
     private String instrument;
     private String especificacao;
 
-    private BigDecimal quantidade;
-    private BigDecimal preco;
-    private BigDecimal valorTotal;
+    private Double quantidade;
+    private Double preco;
+    private Double valorTotal;
     
 }

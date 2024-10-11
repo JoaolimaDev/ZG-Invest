@@ -1,6 +1,5 @@
 package com.desafio_zg.domain.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
@@ -19,8 +18,6 @@ public class InstrumentQuote {
     private Long id;
 
     private String simbol;
-
-    private BigDecimal price;
-
+    private Double price;
     private LocalDate date;
 }

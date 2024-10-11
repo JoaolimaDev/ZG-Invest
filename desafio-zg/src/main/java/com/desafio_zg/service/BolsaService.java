@@ -1,11 +1,12 @@
 package com.desafio_zg.service;
 
-import java.util.HashMap;
+import java.time.LocalDate;
+import java.util.List;
 
-import com.desafio_zg.dto.Request;
+
 
 public interface BolsaService {
 
-    HashMap<Object, Object> calcularRendimentos(Request request);
+     List<?>  calcularRendimentos(LocalDate request);
     
 }
