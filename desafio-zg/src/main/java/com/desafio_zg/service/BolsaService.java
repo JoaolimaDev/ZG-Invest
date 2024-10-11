@@ -1,12 +1,16 @@
 package com.desafio_zg.service;
 
 import java.time.LocalDate;
-import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.desafio_zg.dto.ResultadoCarteiraDTO;
 
 
 
 public interface BolsaService {
 
-     List<?>  calcularRendimentos(LocalDate request);
+   Page<ResultadoCarteiraDTO>  calcularRendimentos(LocalDate request,  Pageable pageable);
     
 }

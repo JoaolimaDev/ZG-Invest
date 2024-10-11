@@ -8,13 +8,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ResultadoCarteiraDTO {
     
+    private String ativo;
     private LocalDate dataReferencia;
     private Double saldoAtual;
     private Double rendimento;
-    private Double totalAcoes;
+    private int totalAcoes;
+
 
     public String getRendimentoFormatado() {
-        return String.format("%1.2f", rendimento);
+        return String.format("%.2f%%", rendimento);
     }
 
 }
