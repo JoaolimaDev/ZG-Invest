@@ -29,7 +29,7 @@ public class UserTrade {
     private String instrument;
     private String especificacao;
 
-    private Double quantidade;
+    private int quantidade;
     private Double preco;
     private Double valorTotal;
     

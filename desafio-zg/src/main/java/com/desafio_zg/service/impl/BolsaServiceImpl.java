@@ -1,5 +1,6 @@
 package com.desafio_zg.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,19 +37,38 @@ public class BolsaServiceImpl implements BolsaService {
         .findByDateLessThanEqualAndSimbolIn(data, listSimbols);
 
         int idx = 0;
-       
+        int quantidadeAtual = 0;
+        double custoTotal = 0;
+        BigDecimal saldoAtual = BigDecimal.ZERO;
+        BigDecimal rendimento = BigDecimal.ZERO;
+
         List<ResultadoCarteiraDTO> resultadoCarteiraList = new ArrayList<>(); 
         
         for (InstrumentQuote fechamentos : fechamento) {
 
+            UserTrade transacao = transacoes.get(idx);
+            
+            quantidadeAtual += transacao.getQuantidade();
+            custoTotal += transacao.getValorTotal();
+            double precoAtual = fechamentos.getPrice();
 
-            idx++;
+            saldoAtual = BigDecimal.valueOf(quantidadeAtual).multiply(BigDecimal.valueOf(precoAtual));
+           
+            rendimento = saldoAtual.subtract(BigDecimal.valueOf(custoTotal))
+            .divide(BigDecimal.valueOf(custoTotal)).multiply(BigDecimal.valueOf(100));
+
+            // System.out.printf("%s, %d ações\n", data, quantidadeAtual);
+            // System.out.printf("Saldo atual: R$ %.2f\n", saldoAtual);
+  
+
+
+            idx++;  
             
         }
 
 
        
-        return fechamento;
+        return resultadoCarteiraList;
     }
     
 }
