@@ -3,9 +3,8 @@ package com.desafio_zg.controller;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import java.util.List;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.desafio_zg.dto.ResultadoCarteiraDTO;
-import com.desafio_zg.service.BolsaService;
+import com.desafio_zg.service.impl.TradeService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "ZG INVEST CONTROLLER", description = "Endpoints relacionados a zgInvestController")
 public class zgInvestController {
 
-    public final BolsaService bolsaService;
+    public final TradeService TradeService;
 
      @Operation(
         summary = "Calcule os redimentos do portfólio com base na data, retorno dos rendimentos da data enviada e histórico", 
@@ -45,7 +43,7 @@ public class zgInvestController {
         @ApiResponse(responseCode = "500", description = "Server error", content = @Content)
     })
     @GetMapping("/calcularRendimentos")
-    public ResponseEntity<Map<String, Map<String, ResultadoCarteiraDTO>>> calcularRendimentos(@RequestParam String dataInicial,
+    public ResponseEntity<List<?>> calcularRendimentos(@RequestParam String dataInicial,
     @RequestParam String dataFinal,
     @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int limit
     ) throws ParseException{
@@ -58,8 +56,8 @@ public class zgInvestController {
         LocalDate dataFinalFormat = LocalDate.parse(dataFinal, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
         
-        Map<String, Map<String, ResultadoCarteiraDTO>> response = bolsaService.calcularRendimentos(dataInicialFormat,
-        dataFinalFormat, PageRequest.of(page, limit));
+        List<?>  response = TradeService.calculateReturnsOverRange(dataInicialFormat,
+        dataFinalFormat);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

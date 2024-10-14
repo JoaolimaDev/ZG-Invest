@@ -15,15 +15,15 @@ import com.desafio_zg.domain.model.InstrumentQuote;
 public interface InstrumentQuoteRepository extends JpaRepository<InstrumentQuote, Long> {
 
 
-@Query(
-    "SELECT E FROM InstrumentQuote E " +
-    "WHERE E.date >= :startDate AND E.date <= :endDate " +
-    "AND E.simbol IN :simbols " +
-    "ORDER BY E.date ASC, E.simbol ASC"
-)
-ArrayList<InstrumentQuote> findBetweenDate(@Param("startDate") LocalDate startDate, 
-                                            @Param("endDate") LocalDate endDate, 
-                                            @Param("simbols") List<String> simbols);
+    @Query(
+        "SELECT E FROM InstrumentQuote E " +
+        "WHERE E.date >= :startDate AND E.date <= :endDate " +
+        "AND E.simbol IN :simbols " +
+        "ORDER BY E.date ASC, E.simbol ASC"
+    )
+    ArrayList<InstrumentQuote> findBetweenDate(@Param("startDate") LocalDate startDate, 
+                                                @Param("endDate") LocalDate endDate, 
+                                                @Param("simbols") List<String> simbols);
 
 }
 
