@@ -2,15 +2,18 @@ package com.desafio_zg.service.impl;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.desafio_zg.config.ExceptionHandler.CustomException;
 import com.desafio_zg.domain.model.InstrumentQuote;
 import com.desafio_zg.domain.model.UserTrade;
 import com.desafio_zg.domain.repository.InstrumentQuoteRepository;
@@ -28,71 +31,159 @@ public class BolsaServiceImpl implements BolsaService {
     public final InstrumentQuoteRepository instrumentRepository;
 
     @Override
-    public  Page<ResultadoCarteiraDTO>  calcularRendimentos(LocalDate request,  Pageable pageable) {
+    public Map<String, Map<String, ResultadoCarteiraDTO>> calcularRendimentos(LocalDate datInicio,
+    LocalDate dataFinal,  Pageable pageable) {
 
-        LocalDate data = request;
-        List<UserTrade> transacoes = userTradeRepository.findBydataLessThanEqual(data, pageable);
+        if (dataFinal.isBefore(datInicio)) {
+            throw new CustomException("Error data inicio enviada anterior a data final",
+            HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<UserTrade> tradeOptional = userTradeRepository.findTopBydataOrderByDataDesc(datInicio);
+
+        if (tradeOptional.get().getData().isAfter(datInicio)) {
+            throw new CustomException("Error data inicio enviada maior que o inicio dos investimentos",
+            HttpStatus.BAD_REQUEST);
+        }
+
+        List<UserTrade> transacoes = userTradeRepository.findBetweendata(datInicio, dataFinal);
 
 
         List<String> listSimbols = transacoes.stream().
-        map(UserTrade::getEspecificacao).distinct().collect(Collectors.toList());
+        map(UserTrade::getInstrument).distinct().collect(Collectors.toList());
 
-        List<InstrumentQuote> fechamento = instrumentRepository
-        .findByDateLessThanEqualAndSimbolIn(data, listSimbols, pageable);
+        ArrayList<InstrumentQuote> fechamento = instrumentRepository
+        .findBetweenDate(datInicio, dataFinal, listSimbols);
 
-        int quantidadeAtual = 0;
-        double saldoAtual =  0D;
-        double rendimento = 0D;
-        double custoTotal = 0D;
-
-        List<ResultadoCarteiraDTO> resultadoCarteiraList = new ArrayList<>(); 
+        ListIterator<String> simbolsListIterator = listSimbols.listIterator();
+        Map<String, Map<String, ResultadoCarteiraDTO>> resultadoMap = new HashMap<>();
+        int lastQuantidadeAtual = 0;
+        double lastCustoTotal = 0;
+        double saldoAtual = 0;
+        double rendimento = 0;
+        double lucroRealizado = 0;
         
-        for (InstrumentQuote fechamentos : fechamento) {
 
-         
-            double precoAtual = fechamentos.getPrice();
-            ResultadoCarteiraDTO resultado = new ResultadoCarteiraDTO();
-            ListIterator<UserTrade> iterator = transacoes.listIterator();
-            
-            
-            if (iterator.hasNext()) {
+        while (simbolsListIterator.hasNext()) {
+            String simbols = simbolsListIterator.next();
+            double custoTotal = 0; 
+            double valorTotalVendas = 0; 
+            int quantidadeAtual = 0;   
+            int quantidadeVendida = 0;     
 
-                UserTrade transacao = iterator.next();
-
-                if(transacao.getData().isEqual(fechamentos.getDate()) || transacao.getData().isBefore(fechamentos.getDate())){
-
+            for (UserTrade transacao : transacoes) {
+                if (transacao.getInstrument().equals(simbols)) {
+                    LocalDate transacaoDate = transacao.getData();
+                    String dateString = transacaoDate.toString();
+    
+                    Map<String, ResultadoCarteiraDTO> dateMap = resultadoMap.computeIfAbsent(dateString, key -> new HashMap<>());
+        
+                    ResultadoCarteiraDTO resultado = dateMap.computeIfAbsent(simbols, symbolKey -> {
+                        ResultadoCarteiraDTO newResult = new ResultadoCarteiraDTO();
+                        newResult.setDataReferencia(transacaoDate);
+                        newResult.setAtivo(new ArrayList<>());
+                        return newResult;
+                    });
+        
+             
                     if (transacao.getTipoOperacao().equals("C")) {
                         quantidadeAtual += transacao.getQuantidade();
                         custoTotal += transacao.getValorTotal();
-                    } else if (transacao.getTipoOperacao().equals("V")) {
+                        resultado.setIsVenda(false);
+                    }else if (transacao.getTipoOperacao().equals("V")) {
                         quantidadeAtual -= transacao.getQuantidade();
-                        custoTotal -= transacao.getValorTotal();
+                        quantidadeVendida += transacao.getQuantidade();
+                        valorTotalVendas += transacao.getValorTotal();
+
+
+                        resultado.setValorTotalVendas(valorTotalVendas);
+                        resultado.setQuantidadeVendida(quantidadeVendida);
+                        resultado.setIsVenda(true);
+
                     }
 
+                    resultado.setTotalAcoes(quantidadeAtual);
+                    resultado.setCustoTotal(custoTotal);
+                    resultado.setIsTransacao(true);
+                    
+
+
+                    if (!resultado.getAtivo().contains(simbols)) {
+                        resultado.getAtivo().add(simbols);
+                    }
                 }
 
-
-                iterator.remove();
-               
             }
 
+            for (InstrumentQuote fechamentos : fechamento) {
 
-            saldoAtual = quantidadeAtual * precoAtual;
-            rendimento = ((saldoAtual - custoTotal) / custoTotal) * 100; 
+                if (fechamentos.getSimbol().equalsIgnoreCase(simbols)) {
+                    LocalDate fechamentoDate = fechamentos.getDate();
+                    String fechamentoDateString = fechamentoDate.toString();
+                
+                
 
-            resultado.setDataReferencia(fechamentos.getDate());
-            resultado.setAtivo(fechamentos.getSimbol());
-            resultado.setSaldoAtual(saldoAtual);
-            resultado.setTotalAcoes(quantidadeAtual);
-            resultado.setRendimento(rendimento);
+                    if (resultadoMap.containsKey(fechamentoDateString)) {
+                        Map<String, ResultadoCarteiraDTO> previousDateMap = resultadoMap.get(fechamentoDateString);
+                        ResultadoCarteiraDTO previousResult = previousDateMap.get(simbols);
 
-            resultadoCarteiraList.add(resultado);
-            
+                      
+                        if (previousResult != null && previousResult.getIsTransacao()) {
 
-        }
-
-        return new PageImpl<>(resultadoCarteiraList, pageable, resultadoCarteiraList.size());
-    }
-
+                            if (!previousResult.getIsVenda()) {
+                             
+                                lastQuantidadeAtual = previousResult.getTotalAcoes();
+                                lastCustoTotal = previousResult.getCustoTotal();
     
+                                saldoAtual = lastQuantidadeAtual * fechamentos.getPrice();
+                                rendimento = ((saldoAtual - lastCustoTotal) / lastCustoTotal) * 100; 
+    
+                                previousResult.setRendimento(rendimento);
+                                previousResult.setSaldoAtual(saldoAtual);
+                            
+                                //System.out.println(previousResult.getAtivo() + " " +previousResult.getCustoTotal() + "compra");
+                            
+                            }else if(previousResult.getIsVenda()){
+                                
+                                lucroRealizado = previousResult.getValorTotalVendas() - previousResult.getCustoTotal();
+                                rendimento = (lucroRealizado / custoTotal) * 100;
+                                previousResult.setRendimento(rendimento);
+
+                                //System.out.println(previousResult.getAtivo() + " " +previousResult.getValorTotalVendas());
+
+                            }
+                        }
+
+                    
+
+                    }
+
+                 
+                    Map<String, ResultadoCarteiraDTO> dateMap = resultadoMap.computeIfAbsent(fechamentoDateString, key -> new HashMap<>());
+
+                    ResultadoCarteiraDTO resultado = dateMap.computeIfAbsent(fechamentos.getSimbol(), symbolKey -> {
+                        ResultadoCarteiraDTO newResult = new ResultadoCarteiraDTO();
+                        newResult.setDataReferencia(fechamentoDate);
+                        newResult.setAtivo(new ArrayList<>());
+                        return newResult;
+                    });
+
+                    resultado.setIsTransacao(false);
+
+                    if (!resultado.getAtivo().contains(fechamentos.getSimbol())) {
+                        resultado.getAtivo().add(fechamentos.getSimbol());
+                    }
+                    
+                
+               
+                }
+            }
+            
+        
+        }
+        
+        return resultadoMap;
+        
+    
+    }
 }

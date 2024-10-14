@@ -3,8 +3,8 @@ package com.desafio_zg.controller;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,16 +45,21 @@ public class zgInvestController {
         @ApiResponse(responseCode = "500", description = "Server error", content = @Content)
     })
     @GetMapping("/calcularRendimentos")
-    public ResponseEntity<Page<ResultadoCarteiraDTO> > calcularRendimentos(@RequestParam String date,
-    @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int limit) throws ParseException{
+    public ResponseEntity<Map<String, Map<String, ResultadoCarteiraDTO>>> calcularRendimentos(@RequestParam String dataInicial,
+    @RequestParam String dataFinal,
+    @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int limit
+    ) throws ParseException{
 
         // if (date.isEmpty() || date.isBlank()) {
         //     throw new CustomException("O campo data é obrigatório!", HttpStatus.BAD_REQUEST);
         // }
 
-        LocalDate dataConsulta = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDate dataInicialFormat = LocalDate.parse(dataInicial, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDate dataFinalFormat = LocalDate.parse(dataFinal, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-        Page<ResultadoCarteiraDTO> response = bolsaService.calcularRendimentos(dataConsulta, PageRequest.of(page, limit));
+        
+        Map<String, Map<String, ResultadoCarteiraDTO>> response = bolsaService.calcularRendimentos(dataInicialFormat,
+        dataFinalFormat, PageRequest.of(page, limit));
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
