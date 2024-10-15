@@ -12,7 +12,7 @@ import com.desafio_zg.domain.model.InstrumentQuote;
 
 @Repository
 public interface InstrumentQuoteRepository extends JpaRepository<InstrumentQuote, Long> {
-    @Query("SELECT q FROM InstrumentQuote q WHERE q.date BETWEEN :startDate AND :endDate AND q.simbol IN :listSymbols")
+    @Query("SELECT q FROM InstrumentQuote q WHERE q.date BETWEEN :startDate AND :endDate AND q.simbol IN :listSymbols ORDER BY q.date ASC")
     List<InstrumentQuote> findBetweenDate(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate, @Param("listSymbols") List<String> listSymbols);
     
     

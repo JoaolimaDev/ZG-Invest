@@ -6,5 +6,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DailyReturnDTO {
     private double quantity;
+    private double cost;
+    private boolean isTransacao;
 
 }

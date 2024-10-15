@@ -42,18 +42,19 @@ public class TradeService {
         .distinct().collect(Collectors.toList()); 
         
         List<InstrumentQuote> instrumentQuotes = instrumentQuoteRepository.findBetweenDate(startDate, endDate, listSymbols);
-
+    
         List<LocalDate> tradesByday = userTrades.stream().map(mapper -> mapper.getData())
         .distinct().collect(Collectors.toList()); 
 
 
         ListIterator<String> simbolsList = listSymbols.listIterator();
         String simbols = "";
+        double quantity = 0;
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
            
-
             if (tradesByday.contains(date)) {
                 int quantidadeAtual = 0;
+                double custoTotal = 0;
              
                 if (simbolsList.hasNext()) {
                     simbols = simbolsList.next();
@@ -64,7 +65,6 @@ public class TradeService {
                 
                     if (simbols.equals(trades.getInstrument())) {
 
-                        //int quantidadeAtual = 0;
                         String key = trades.getData().toString();
                         String transacoesKeys = trades.getInstrument();
 
@@ -85,42 +85,125 @@ public class TradeService {
                             Map<String, DailyReturnDTO> transacoes = holdings.get(key).getTransacoes();
 
                             if (transacoes.containsKey(transacoesKeys)) {
-                                
-                        
-                                quantidadeAtual += trades.getQuantidade(); 
+
+                                if (trades.getTipoOperacao().equalsIgnoreCase("C")) {
+                                    quantidadeAtual += trades.getQuantidade(); 
+                                    custoTotal += trades.getValorTotal();
+                                }else if (trades.getTipoOperacao().equalsIgnoreCase("V")) {
+                                    quantidadeAtual -= trades.getQuantidade(); 
+                                    custoTotal -= trades.getValorTotal();
+                                }
+
+                              
                                 DailyReturnDTO retornoDTO = transacoes.get(transacoesKeys);
                                 retornoDTO.setQuantity(quantidadeAtual);
+                                dailyReturnDTO.setTransacao(true);
+                                retornoDTO.setCost(custoTotal);
 
-                                
-                                System.err.println(key + " " + transacoesKeys + " " + trades.getQuantidade() );
                             }else{
-                                System.out.println(simbols);
+                               
                                 quantidadeAtual = trades.getQuantidade();
+                                if (trades.getTipoOperacao().equalsIgnoreCase("C")) {
+                                    custoTotal += trades.getValorTotal();
+                                }else if (trades.getTipoOperacao().equalsIgnoreCase("V")) {
+                                    custoTotal -= trades.getValorTotal();
+                                }
+                               
                                 dailyReturnDTO.setQuantity(quantidadeAtual);
+                                dailyReturnDTO.setCost(custoTotal);
+                                dailyReturnDTO.setTransacao(true);
                                 transacoes.put(transacoesKeys, dailyReturnDTO);
         
                             }
                             
-                            // System.out.println(simbols);
-                            // quantidadeAtual = trades.getQuantidade();
-                            // dailyReturnDTO.setQuantity(quantidadeAtual);
-                            // transacoes.put(transacoesKeys, dailyReturnDTO);
-        
-                            // System.err.println(key + " " + transacoesKeys + " initialized with " + quantidadeAtual);
-                            
 
-                        
                         }
                         
                     }
-                    
-                    //System.err.println(key + " " + trades.getInstrument() + " " + trades.getQuantidade() + " somados" + quantidadeAtual);
+                
                 }
                     
                    
                     
-                }
             }
+
+       
+            for (InstrumentQuote instrumentQuote : instrumentQuotes) {
+
+                String key = date.toString();
+                LocalDate dateKey = date.minusDays(1);
+                String instrumentQuoteKey = instrumentQuote.getSimbol();
+                DailyReturnDTO dailyReturnDTO = new DailyReturnDTO();
+                
+            
+                if (!holdings.containsKey(key)) {
+
+                    if (holdings.containsKey(dateKey.toString())) {
+                        Map<String, DailyReturnDTO> previusDTO = holdings.get(dateKey.toString())
+                        .getTransacoes();
+                        
+    
+                        if (previusDTO.containsKey(instrumentQuoteKey)) {
+    
+                            if (previusDTO.get(instrumentQuoteKey).getQuantity() > 0) {
+                                quantity = previusDTO.get(instrumentQuoteKey).getQuantity();
+                            }else{
+                                quantity = 0;
+                            }
+                        }
+                    }
+                    
+                    if (key.equals(instrumentQuote.getDate().toString())) {
+
+                        HoldingDTO tradesIsntrumentData = new HoldingDTO();
+                        HashMap<String, DailyReturnDTO> pass = new HashMap();
+    
+                        dailyReturnDTO.setTransacao(false);
+                        dailyReturnDTO.setQuantity(quantity);
+                        pass.put(instrumentQuote.getSimbol(), dailyReturnDTO);
+                        tradesIsntrumentData.setTransacoes(pass);
+                        
+                                
+                        holdings.putIfAbsent(key, tradesIsntrumentData);
+                        //System.err.println(instrumentQuoteKey);
+                    }
+                    
+
+                }
+
+                if (holdings.containsKey(key)) {    
+
+                    Map<String, DailyReturnDTO> transacoes = holdings.get(key).getTransacoes();
+                  
+                    if (holdings.containsKey(dateKey.minusDays(1).toString())) {
+
+                        Map<String, DailyReturnDTO> previusDTO = holdings.get(dateKey.minusDays(1).toString())
+                        .getTransacoes();
+
+
+                        if (previusDTO.containsKey(instrumentQuoteKey)) {
+
+                            if (!transacoes.containsKey(instrumentQuoteKey)) {
+                                
+                                dailyReturnDTO.setTransacao(false);
+                                // dailyReturnDTO.setQuantity(15.0);
+                                transacoes.putIfAbsent(instrumentQuoteKey, dailyReturnDTO);
+
+                                // System.out.println("Chave atual:" +  dateKey);
+                                // System.out.println(instrumentQuoteKey);
+
+                            }
+                        }
+
+
+                    }
+                    
+                }
+
+
+            }
+
+        }
 
         return result;
     }
