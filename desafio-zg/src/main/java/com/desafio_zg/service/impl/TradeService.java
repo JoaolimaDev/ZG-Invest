@@ -61,7 +61,6 @@ public class TradeService {
                 }
               
                 for (UserTrade trades : userTrades) {
-
                 
                     if (simbols.equals(trades.getInstrument())) {
 
@@ -135,70 +134,93 @@ public class TradeService {
                 String instrumentQuoteKey = instrumentQuote.getSimbol();
                 DailyReturnDTO dailyReturnDTO = new DailyReturnDTO();
                 
+
+                if (holdings.containsKey(key)) {
+            
+                    // System.out.println(key);
+        
+                }
             
                 if (!holdings.containsKey(key)) {
 
-                    if (holdings.containsKey(dateKey.toString())) {
-                        Map<String, DailyReturnDTO> previusDTO = holdings.get(dateKey.toString())
-                        .getTransacoes();
-                        
-    
-                        if (previusDTO.containsKey(instrumentQuoteKey)) {
-    
-                            if (previusDTO.get(instrumentQuoteKey).getQuantity() > 0) {
-                                quantity = previusDTO.get(instrumentQuoteKey).getQuantity();
-                            }else{
-                                quantity = 0;
-                            }
-                        }
-                    }
-                    
-                    if (key.equals(instrumentQuote.getDate().toString())) {
-
+                    if (instrumentQuote.getDate().equals(date)) {
                         HoldingDTO tradesIsntrumentData = new HoldingDTO();
                         HashMap<String, DailyReturnDTO> pass = new HashMap();
     
                         dailyReturnDTO.setTransacao(false);
-                        dailyReturnDTO.setQuantity(quantity);
+                        // dailyReturnDTO.setQuantity(quantity);
                         pass.put(instrumentQuote.getSimbol(), dailyReturnDTO);
                         tradesIsntrumentData.setTransacoes(pass);
                         
                                 
                         holdings.putIfAbsent(key, tradesIsntrumentData);
-                        //System.err.println(instrumentQuoteKey);
+                        System.err.println(instrumentQuoteKey);
                     }
                     
 
-                }
+                    
+                    // if (holdings.containsKey(dateKey.toString())) {
+                    //     Map<String, DailyReturnDTO> previusDTO = holdings.get(dateKey.toString())
+                    //     .getTransacoes();
+                        
+    
+                    //     if (previusDTO.containsKey(instrumentQuoteKey)) {
+    
+                    //         if (previusDTO.get(instrumentQuoteKey).getQuantity() > 0) {
+                    //             quantity = previusDTO.get(instrumentQuoteKey).getQuantity();
+                    //         }else{
+                    //             quantity = 0;
+                    //         }
+                    //     }
+                    // }
+                    
+                    
+                    // if (key.equals(instrumentQuote.getDate().toString())) {
 
-                if (holdings.containsKey(key)) {    
-
-                    Map<String, DailyReturnDTO> transacoes = holdings.get(key).getTransacoes();
-                  
-                    if (holdings.containsKey(dateKey.minusDays(1).toString())) {
-
-                        Map<String, DailyReturnDTO> previusDTO = holdings.get(dateKey.minusDays(1).toString())
-                        .getTransacoes();
-
-
-                        if (previusDTO.containsKey(instrumentQuoteKey)) {
-
-                            if (!transacoes.containsKey(instrumentQuoteKey)) {
+                    //     HoldingDTO tradesIsntrumentData = new HoldingDTO();
+                    //     HashMap<String, DailyReturnDTO> pass = new HashMap();
+    
+                    //     dailyReturnDTO.setTransacao(false);
+                    //     dailyReturnDTO.setQuantity(quantity);
+                    //     pass.put(instrumentQuote.getSimbol(), dailyReturnDTO);
+                    //     tradesIsntrumentData.setTransacoes(pass);
+                        
                                 
-                                dailyReturnDTO.setTransacao(false);
-                                // dailyReturnDTO.setQuantity(15.0);
-                                transacoes.putIfAbsent(instrumentQuoteKey, dailyReturnDTO);
-
-                                // System.out.println("Chave atual:" +  dateKey);
-                                // System.out.println(instrumentQuoteKey);
-
-                            }
-                        }
-
-
-                    }
+                    //     holdings.putIfAbsent(key, tradesIsntrumentData);
+                    //     System.err.println(key + " " +instrumentQuoteKey);
+                    // }
                     
+
                 }
+
+                // if (holdings.containsKey(key)) {    
+
+                //     Map<String, DailyReturnDTO> transacoes = holdings.get(key).getTransacoes();
+                  
+                //     if (holdings.containsKey(dateKey.minusDays(1).toString())) {
+
+                //         Map<String, DailyReturnDTO> previusDTO = holdings.get(dateKey.minusDays(1).toString())
+                //         .getTransacoes();
+
+
+                //         if (previusDTO.containsKey(instrumentQuoteKey)) {
+
+                //             if (!transacoes.containsKey(instrumentQuoteKey)) {
+                                
+                //                 dailyReturnDTO.setTransacao(false);
+                //                 // dailyReturnDTO.setQuantity(15.0);
+                //                 transacoes.putIfAbsent(instrumentQuoteKey, dailyReturnDTO);
+
+                //                 // System.out.println("Chave atual:" +  dateKey);
+                //                 // System.out.println(instrumentQuoteKey);
+
+                //             }
+                //         }
+
+
+                //     }
+                    
+                // }
 
 
             }

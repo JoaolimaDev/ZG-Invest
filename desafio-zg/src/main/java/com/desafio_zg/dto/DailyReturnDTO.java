@@ -8,5 +8,6 @@ public class DailyReturnDTO {
     private double quantity;
     private double cost;
     private boolean isTransacao;
+    private String dataref;
 
 }
