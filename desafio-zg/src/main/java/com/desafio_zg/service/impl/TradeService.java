@@ -49,7 +49,8 @@ public class TradeService {
 
         ListIterator<String> simbolsList = listSymbols.listIterator();
         String simbols = "";
-        double quantity = 0;
+        double quant = 0;
+        String instrumento = "";
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
            
             if (tradesByday.contains(date)) {
@@ -130,17 +131,11 @@ public class TradeService {
             for (InstrumentQuote instrumentQuote : instrumentQuotes) {
 
                 String key = date.toString();
-                LocalDate dateKey = date.minusDays(1);
                 String instrumentQuoteKey = instrumentQuote.getSimbol();
                 DailyReturnDTO dailyReturnDTO = new DailyReturnDTO();
-                
-
-                if (holdings.containsKey(key)) {
-            
-                    // System.out.println(key);
-        
-                }
-            
+                Map<String, DailyReturnDTO> transacoesCapture = new HashMap<>();  
+                HoldingDTO holdingDTO = new HoldingDTO();     
+               
                 if (!holdings.containsKey(key)) {
 
                     if (instrumentQuote.getDate().equals(date)) {
@@ -149,49 +144,91 @@ public class TradeService {
     
                         dailyReturnDTO.setTransacao(false);
                         // dailyReturnDTO.setQuantity(quantity);
-                        pass.put(instrumentQuote.getSimbol(), dailyReturnDTO);
+                        pass.put(instrumentQuoteKey, dailyReturnDTO);
                         tradesIsntrumentData.setTransacoes(pass);
                         
-                                
+                        // System.out.println(key + " " +pass);
                         holdings.putIfAbsent(key, tradesIsntrumentData);
-                        System.err.println(instrumentQuoteKey);
+                        // System.err.println(instrumentQuoteKey);
                     }
                     
 
-                    
-                    // if (holdings.containsKey(dateKey.toString())) {
-                    //     Map<String, DailyReturnDTO> previusDTO = holdings.get(dateKey.toString())
-                    //     .getTransacoes();
-                        
-    
-                    //     if (previusDTO.containsKey(instrumentQuoteKey)) {
-    
-                    //         if (previusDTO.get(instrumentQuoteKey).getQuantity() > 0) {
-                    //             quantity = previusDTO.get(instrumentQuoteKey).getQuantity();
-                    //         }else{
-                    //             quantity = 0;
-                    //         }
-                    //     }
-                    // }
-                    
-                    
-                    // if (key.equals(instrumentQuote.getDate().toString())) {
-
-                    //     HoldingDTO tradesIsntrumentData = new HoldingDTO();
-                    //     HashMap<String, DailyReturnDTO> pass = new HashMap();
-    
-                    //     dailyReturnDTO.setTransacao(false);
-                    //     dailyReturnDTO.setQuantity(quantity);
-                    //     pass.put(instrumentQuote.getSimbol(), dailyReturnDTO);
-                    //     tradesIsntrumentData.setTransacoes(pass);
-                        
-                                
-                    //     holdings.putIfAbsent(key, tradesIsntrumentData);
-                    //     System.err.println(key + " " +instrumentQuoteKey);
-                    // }
-                    
-
                 }
+
+                if (holdings.containsKey(key)) {
+                    
+                    Map<String, DailyReturnDTO> transacoes = holdings.get(key).getTransacoes();
+                    DailyReturnDTO transicaoFound = transacoes.get(instrumentQuoteKey);
+
+                    if (transacoes.containsKey(instrumentQuoteKey)) {
+
+                        if(key.equals(instrumentQuote.getDate().toString())){
+
+                            if (transicaoFound.isTransacao()) {
+
+                                transacoesCapture.put(instrumentQuoteKey, transicaoFound); 
+                                holdingDTO.setTransacoes(transacoesCapture);
+
+                            }
+                        }                  
+                    }
+
+                    if (!transacoesCapture.isEmpty()) {
+                        String nextDateKey = date.plusDays(1).toString();
+                        HoldingDTO nextDayHolding = holdings.get(nextDateKey);
+                        
+                        if (nextDayHolding == null) {
+                            holdings.put(nextDateKey, holdingDTO);
+                            System.out.println(nextDateKey);
+                        }
+                    }
+             
+                
+                }
+                
+
+
+    
+                // System.out.println(previousdate);
+          
+                // if (holdings.containsKey(previousdate)) {
+                        
+                //     System.out.println(previousdate);
+                // }
+
+                
+                // if (holdings.containsKey(dateKey.toString())) {
+                //     Map<String, DailyReturnDTO> previusDTO = holdings.get(dateKey.toString())
+                //     .getTransacoes();
+                    
+
+                //     if (previusDTO.containsKey(instrumentQuoteKey)) {
+
+                //         if (previusDTO.get(instrumentQuoteKey).getQuantity() > 0) {
+                //             quantity = previusDTO.get(instrumentQuoteKey).getQuantity();
+                //         }else{
+                //             quantity = 0;
+                //         }
+                //     }
+                // }
+                
+                
+                // if (key.equals(instrumentQuote.getDate().toString())) {
+
+                //     HoldingDTO tradesIsntrumentData = new HoldingDTO();
+                //     HashMap<String, DailyReturnDTO> pass = new HashMap();
+
+                //     dailyReturnDTO.setTransacao(false);
+                //     dailyReturnDTO.setQuantity(quantity);
+                //     pass.put(instrumentQuote.getSimbol(), dailyReturnDTO);
+                //     tradesIsntrumentData.setTransacoes(pass);
+                    
+                            
+                //     holdings.putIfAbsent(key, tradesIsntrumentData);
+                //     System.err.println(key + " " +instrumentQuoteKey);
+                // }
+                
+
 
                 // if (holdings.containsKey(key)) {    
 
