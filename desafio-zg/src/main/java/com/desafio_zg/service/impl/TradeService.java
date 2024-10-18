@@ -8,6 +8,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import java.util.Set;
+import java.util.HashSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,10 +34,10 @@ public class TradeService {
 
     @Transactional(readOnly = true)
     public List<?>  calculateReturnsOverRange(LocalDate startDate, LocalDate endDate) {
-
+        DailyReturnDTO holdingDTO02 = new DailyReturnDTO();    
         Map<String, HoldingDTO> holdings = new HashMap<>();
-
-        List<?> result = List.of(holdings);
+        Map<String, HoldingDTO> holdingsTeste = new HashMap<>();
+        List<?> result = List.of(holdingsTeste);
 
         List<UserTrade> userTrades = userTradeRepository.findBetweendataList(startDate, endDate);
 
@@ -53,11 +55,12 @@ public class TradeService {
         double quant = 0;
         String instrumento = "";
         HoldingDTO transacoesCapture = new HoldingDTO();
-        Map<String, DailyReturnDTO> lastTransacoes = new HashMap<>();
-
+            Map<String, DailyReturnDTO> lastTransacoes = new HashMap<>();
+        double quantiy = 0;
         String cutOff = "2078-01-12";
+        Set<String> set = new HashSet<>();
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-           
+            LocalDate currentDate = date;
             if (tradesByday.contains(date)) {
                 int quantidadeAtual = 0;
                 double custoTotal = 0;
@@ -163,11 +166,8 @@ public class TradeService {
 
                 String key02 = date.toString();
                 String instrumentQuoteKey02 = instrumentQuote02.getSimbol();
-                DailyReturnDTO dailyReturnDTO02 = new DailyReturnDTO(); 
-                HoldingDTO holdingDTO02 = new HoldingDTO();     
                
-
-
+    
                 if (holdings.containsKey(key02)) {
                     
                     Map<String, DailyReturnDTO> transacoes = holdings.get(key02).getTransacoes();
@@ -180,22 +180,55 @@ public class TradeService {
                             if (transicaoFound.isTransacao()) {             
                                
                                 cutOff = date.toString();
-                                transacoes.get(instrumentQuoteKey02).setTransacao(false);
-                                transacoesCapture.setTransacoes(transacoes);
-                            }else{
+                                double newQuantity = transicaoFound.getQuantity();
+                                quantiy = transicaoFound.getQuantity();
 
-                                System.out.println(date);
+                                lastTransacoes.computeIfAbsent(instrumentQuoteKey02, k -> transicaoFound);
+
+                                lastTransacoes.compute(instrumentQuoteKey02, (k, existingTransaction) -> {
+                                    double existingQuantity = existingTransaction.getQuantity();
+                                    double differenceThreshold = 0.01; // 1% 
+            
+                                    if (Math.abs(newQuantity - existingQuantity) > existingQuantity * differenceThreshold) {
+                                       
+                                        return transicaoFound; 
+                                    } else {
+
+                                        return existingTransaction;
+                                    }
+                                });
+  
+
                             }
-                          
+
+                            lastTransacoes.forEach((key, dailyReturnDTO) -> {
+
+                                DailyReturnDTO dailyReturnDTONew = new DailyReturnDTO(); 
+                                Map<String, DailyReturnDTO> transacaoNew = new HashMap<>();
+                                HoldingDTO holdingDTONew = new HoldingDTO();  
+
+                             
+                              
+                                dailyReturnDTONew.setQuantity(dailyReturnDTO.getQuantity());
+                                transacaoNew.put(key, dailyReturnDTONew);
+                                holdingDTONew.setTransacoes(transacaoNew);
+                                holdingsTeste.put(currentDate.toString(), holdingDTONew);
+                                
+                            });
+
                             
                         }                  
                     }
 
                 }
 
+              
+
             }
 
         }
+    
+      
 
         return result;
     }
