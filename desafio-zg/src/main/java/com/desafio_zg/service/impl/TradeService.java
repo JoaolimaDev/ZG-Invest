@@ -37,7 +37,7 @@ public class TradeService {
         DailyReturnDTO holdingDTO02 = new DailyReturnDTO();    
         Map<String, HoldingDTO> holdings = new HashMap<>();
         Map<String, HoldingDTO> holdingsTeste = new HashMap<>();
-        List<?> result = List.of(holdingsTeste);
+        List<?> result = List.of(holdings);
 
         List<UserTrade> userTrades = userTradeRepository.findBetweendataList(startDate, endDate);
 
@@ -201,22 +201,35 @@ public class TradeService {
 
                             }
 
-                            lastTransacoes.forEach((key, dailyReturnDTO) -> {
+                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                            LocalDate datecuteDateOff = LocalDate.parse(cutOff, formatter);
 
-                                DailyReturnDTO dailyReturnDTONew = new DailyReturnDTO(); 
-                                Map<String, DailyReturnDTO> transacaoNew = new HashMap<>();
-                                HoldingDTO holdingDTONew = new HoldingDTO();  
-
-                             
-                              
-                                dailyReturnDTONew.setQuantity(dailyReturnDTO.getQuantity());
-                                transacaoNew.put(key, dailyReturnDTONew);
-                                holdingDTONew.setTransacoes(transacaoNew);
-                                holdingsTeste.put(currentDate.toString(), holdingDTONew);
+                            if (date.isAfter(datecuteDateOff)) {
                                 
-                            });
+                        
+                                lastTransacoes.forEach((key, dailyReturnDTO) -> {
 
-                            
+                                   
+                                    HoldingDTO holdingDTONew = holdings.getOrDefault(key02, new HoldingDTO());
+                                    Map<String, DailyReturnDTO> transacaoNew = holdingDTONew.getTransacoes();
+                                    if (transacaoNew == null) {
+                                        transacaoNew = new HashMap<>();
+                                    }
+                                
+                                    DailyReturnDTO dailyReturnDTONew = new DailyReturnDTO(); 
+                                    dailyReturnDTONew.setQuantity(dailyReturnDTO.getQuantity());
+
+                                    transacaoNew.put(key, dailyReturnDTONew);
+                                    holdingDTONew.setTransacoes(transacaoNew);
+                                    holdings.put(key02, holdingDTONew);
+                                
+                                    System.out.println(key02 + " " + holdingDTONew);
+                                    
+                                });
+
+                                break;
+
+                            }
                         }                  
                     }
 
