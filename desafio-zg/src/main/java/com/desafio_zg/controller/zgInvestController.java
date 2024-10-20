@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.desafio_zg.service.impl.TradeService;
+
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "ZG INVEST CONTROLLER", description = "Endpoints relacionados a zgInvestController")
 public class zgInvestController {
 
-    public final TradeService TradeService;
+    public final com.desafio_zg.service.TradeService TradeService;
 
      @Operation(
         summary = "Calcule os redimentos do portfólio com base na data, retorno dos rendimentos da data enviada e histórico", 
@@ -44,13 +44,9 @@ public class zgInvestController {
     })
     @GetMapping("/calcularRendimentos")
     public ResponseEntity<List<?>> calcularRendimentos(@RequestParam String dataInicial,
-    @RequestParam String dataFinal,
-    @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int limit
+    @RequestParam String dataFinal
     ) throws ParseException{
 
-        // if (date.isEmpty() || date.isBlank()) {
-        //     throw new CustomException("O campo data é obrigatório!", HttpStatus.BAD_REQUEST);
-        // }
 
         LocalDate dataInicialFormat = LocalDate.parse(dataInicial, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         LocalDate dataFinalFormat = LocalDate.parse(dataFinal, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
