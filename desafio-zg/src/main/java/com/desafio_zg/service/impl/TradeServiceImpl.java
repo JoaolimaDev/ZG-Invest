@@ -257,8 +257,7 @@ public class TradeServiceImpl implements TradeService {
                                     
                                     if (transacaoNew.get(key).isVenda()) {
 
-                                    
-                                        
+                                
                                         double lucroRealizado = dailyReturnDTO.getValorTotalVendas() -
                                         dailyReturnDTO.getCost();
                                         rendimento = (lucroRealizado / dailyReturnDTO.getCost()) * 100;
@@ -291,12 +290,12 @@ public class TradeServiceImpl implements TradeService {
                                 dailyReturnDTONew.setSaldo(saldoAtual);
                                 transacaoNew.put(key, dailyReturnDTONew);
 
-                                // if (dailyReturnDTONew.getQuantity() <= 0 && dailyReturnDTONew.isVenda() == false) {
+                                if (dailyReturnDTONew.getQuantity() <= 0 && dailyReturnDTONew.isVenda() == false) {
                                     
                                     
-                                //     transacaoNew.remove(key);
+                                    transacaoNew.remove(key);
                                     
-                                // }
+                                }
 
                                 holdingDTONew.setTransacoes(transacaoNew);
                                 holdings.put(key02, holdingDTONew);
