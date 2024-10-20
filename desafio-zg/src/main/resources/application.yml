@@ -1,6 +1,6 @@
 spring:
   application:
-    name : desafio-zg
+    name: desafio-zg
   datasource:
     url: jdbc:postgresql://localhost:5432/bolsa
     username: postgres
@@ -14,7 +14,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
+    api-docs:
+      path: /v3/api-docs
+    swagger-ui:
+      path: /swagger-ui.html
