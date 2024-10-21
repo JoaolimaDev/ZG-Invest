@@ -13,7 +13,7 @@ describe('Transacao', () => {
       rendimentoFormatado: "0.00%",
       venda: false,
       transacao: false,
-      dateReceived: "2024-01-01" // Add this line with an appropriate date
+      dateReceived: "2024-01-01" 
     };
     expect(transacao).toBeTruthy();
   });

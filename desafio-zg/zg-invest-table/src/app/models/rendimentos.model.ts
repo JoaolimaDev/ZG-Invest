@@ -11,13 +11,13 @@ export interface Transacao {
   rendimentoFormatado: string;
   venda: boolean;
   transacao: boolean;
-  dateReceived: string; // Ensure this is present in your API response
+  dateReceived: string; 
 }
 
 export interface DiaDeTransacoes {
-  transacoes: { [stock: string]: Transacao }; // This defines the shape of transacoes
+  transacoes: { [stock: string]: Transacao };
 }
 
 export interface ApiResponse {
-  [date: string]: DiaDeTransacoes; // This indicates that each date maps to a DiaDeTransacoes
+  [date: string]: DiaDeTransacoes; 
 }

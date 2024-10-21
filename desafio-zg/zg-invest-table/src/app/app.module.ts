@@ -11,6 +11,7 @@ import { RendimentosTableComponent } from './components/rendimentos-table/rendim
 import { AppRoutingModule } from './app-routing.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';  // Import this module
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 @NgModule({
   declarations: [AppComponent, RendimentosTableComponent],
@@ -21,6 +22,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
     MatDatepickerModule,
     MatInputModule,
     MatNativeDateModule,
+    MatPaginatorModule,
     FormsModule,
     AppRoutingModule,
     BrowserAnimationsModule,

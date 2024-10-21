@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
-import { ApiResponse, Transacao, DiaDeTransacoes } from '../../models/rendimentos.model'; 
+import { ApiResponse, Transacao, DiaDeTransacoes } from '../../models/rendimentos.model';
 
 @Component({
   selector: 'app-rendimentos-table',
@@ -9,10 +9,16 @@ import { ApiResponse, Transacao, DiaDeTransacoes } from '../../models/rendimento
 })
 export class RendimentosTableComponent implements OnInit {
   dataSource: Array<{ date: string; stock: string } & Transacao> = [];
+  paginatedData: Array<{ date: string; stock: string } & Transacao> = [];
   displayedColumns: string[] = ['date', 'stock', 'quantity', 'cost', 'rendimentoFormatado', 'dateReceived'];
 
   dataInicial: Date = new Date('2019-01-17');
   dataFinal: Date = new Date('2020-01-22');
+
+  totalElements: number = 0; 
+  pageSize: number = 5; 
+  currentPage: number = 0; 
+  searchTerm: string = ''; 
 
   constructor(private apiService: ApiService) {}
 
@@ -25,8 +31,10 @@ export class RendimentosTableComponent implements OnInit {
     const formattedDataFinal = this.formatDate(this.dataFinal);
     this.apiService.getRendimentos(formattedDataInicial, formattedDataFinal).subscribe(
       (data: ApiResponse) => {
-        console.log(data);
+        console.log('Full API Response:', data); 
         this.dataSource = this.transformData(data);
+        this.totalElements = this.dataSource.length; 
+        this.updatePaginatedData(); 
       },
       (error) => {
         console.error('Error fetching rendimentos:', error);
@@ -43,15 +51,14 @@ export class RendimentosTableComponent implements OnInit {
 
   transformData(data: ApiResponse): Array<{ date: string; stock: string } & Transacao> {
     const result: Array<{ date: string; stock: string } & Transacao> = [];
-    
-    
+
+   
     if (Array.isArray(data)) {
       data.forEach(item => {
         for (const [date, transactions] of Object.entries(item)) {
-       
           const diaDeTransacoes = transactions as DiaDeTransacoes;
 
-    
+        
           if (diaDeTransacoes && diaDeTransacoes.transacoes) {
             const transacoes: { [stock: string]: Transacao } = diaDeTransacoes.transacoes;
 
@@ -59,19 +66,34 @@ export class RendimentosTableComponent implements OnInit {
               result.push({
                 date,
                 stock,
-                ...details,
+                ...details, 
                 dateReceived: date 
               });
             }
           } else {
-            console.error(`Expected transactions to contain transacoes for date ${date}, but got:`, transactions);
+            console.error(transactions);
           }
         }
       });
     } else {
-      console.error('Expected data to be an array, but got:', data);
+      console.error( data);
     }
-    
+
     return result;
   }
+
+  updatePaginatedData(): void {
+    const start = this.currentPage * this.pageSize;
+    const end = start + this.pageSize;
+    this.paginatedData = this.dataSource.slice(start, end);
+  }
+
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updatePaginatedData(); 
+  }
+
+
+  
 }
