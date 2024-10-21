@@ -75,18 +75,15 @@ classDiagram
 
 
 ## API Endpoints
--------------
-
-| Método | Endpoint                                   | Descrição                                   |
-|--------|--------------------------------------------|---------------------------------------------|
-
-| GET    | `/api/zg-invest/calcularRendimentos?dataInicial=2019-01-17&dataFinal=2020-01-22` 
+| Método | Endpoint                                                               | Descrição                                   |
+|--------|------------------------------------------------------------------------|---------------------------------------------|
+| GET    | `/api/zg-invest/calcularRendimentos?dataInicial=2019-01-17&dataFinal=2020-01-22` | Calcula os rendimentos entre as datas especificadas. |
 
 
 ## Como utilizar
 
 ```bash
-   
+    git clone https://github.com/JoaolimaDev/ZG-Invest.git
     sudo docker-compose up --build
     sudo docker-compose exec postgres psql -U postgres -d bolsa -f /docker-entrypoint-initdb.d/bolsa.bkp
 ```
