@@ -12,6 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - ./bolsa.bkp:/docker-entrypoint-initdb.d/bolsa.bkp
+  
   spring-app:
     build:
       context: .
@@ -23,3 +24,12 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
+
+  angular-app:
+    build:
+      context: ./desafio-zg/zg-invest-table 
+      dockerfile: Dockerfile.angular-app
+    ports:
+      - "4200:80"  # Mapeia a aplicação Angular para a porta 4200
+    depends_on:
+      - spring-app
