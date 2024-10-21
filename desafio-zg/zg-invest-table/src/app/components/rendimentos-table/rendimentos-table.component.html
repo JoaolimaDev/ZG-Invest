@@ -14,7 +14,7 @@
       <mat-datepicker #endPicker></mat-datepicker>
     </mat-form-field>
 
-    <button class="buscarr-button"  mat-raised-button (click)="fetchData()">Buscar</button>
+    <button class="buscarr-button" mat-raised-button (click)="fetchData()">Buscar</button>
   </div>
 
   <table mat-table [dataSource]="paginatedData" class="mat-elevation-z8">
@@ -41,6 +41,11 @@
     <ng-container matColumnDef="rendimentoFormatado">
       <th mat-header-cell *matHeaderCellDef>Rendimento</th>
       <td mat-cell *matCellDef="let element">{{ element.rendimentoFormatado }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="saldo">
+      <th mat-header-cell *matHeaderCellDef>Saldo</th>
+      <td mat-cell *matCellDef="let element">{{ element.saldo }}</td>
     </ng-container>
 
     <ng-container matColumnDef="dateReceived">

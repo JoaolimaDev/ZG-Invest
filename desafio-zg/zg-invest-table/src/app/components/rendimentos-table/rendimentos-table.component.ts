@@ -10,7 +10,7 @@ import { ApiResponse, Transacao, DiaDeTransacoes } from '../../models/rendimento
 export class RendimentosTableComponent implements OnInit {
   dataSource: Array<{ date: string; stock: string } & Transacao> = [];
   paginatedData: Array<{ date: string; stock: string } & Transacao> = [];
-  displayedColumns: string[] = ['date', 'stock', 'quantity', 'cost', 'rendimentoFormatado', 'dateReceived'];
+  displayedColumns: string[] = ['date', 'stock', 'quantity', 'cost', 'rendimentoFormatado', 'saldo', 'dateReceived'];
 
   dataInicial: Date = new Date('2019-01-17');
   dataFinal: Date = new Date('2020-01-22');
