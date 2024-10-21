@@ -93,7 +93,7 @@ classDiagram
    - **URL:** http://localhost:8080/swagger-ui/index.html
 
 1. **Front-end**
- - **URL:**  http://localhost:4200/
+   - **URL:**  http://localhost:4200/
 
 
 <p align="left">
